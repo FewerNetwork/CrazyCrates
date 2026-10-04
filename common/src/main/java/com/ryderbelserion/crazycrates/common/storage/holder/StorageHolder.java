@@ -41,7 +41,7 @@ public final class StorageHolder {
         return this.factory.getCrateLocation(id);
     }
 
-    public Map<CrateStatus, CrazyLocation> getCrateLocations() {
+    public Map<CrazyLocation, CrateStatus> getCrateLocations() {
         return this.factory.getCrateLocations();
     }
 
