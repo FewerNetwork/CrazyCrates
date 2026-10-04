@@ -576,9 +576,9 @@ public class CrateManager {
 
         this.fusion.log(Level.WARNING, "All crate information has been loaded, Loading physical crate locations!");
 
-        for (final Map.Entry<CrateStatus, CrazyLocation> index : this.storageHolder.getCrateLocations().entrySet()) {
-            final CrazyLocation key = index.getValue();
-            final CrateStatus status = index.getKey();
+        for (final Map.Entry<CrazyLocation, CrateStatus> index : this.storageHolder.getCrateLocations().entrySet()) {
+            final CrazyLocation key = index.getKey();
+            final CrateStatus status = index.getValue();
 
             if (status.equals(CrateStatus.failed)) {
                 this.brokenLocations.add(key);

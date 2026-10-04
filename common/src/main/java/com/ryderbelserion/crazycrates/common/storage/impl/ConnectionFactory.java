@@ -15,7 +15,7 @@ public abstract class ConnectionFactory {
 
     public abstract Optional<CrazyLocation> getCrateLocation(final String id);
 
-    public abstract Map<CrateStatus, CrazyLocation> getCrateLocations();
+    public abstract Map<CrazyLocation, CrateStatus> getCrateLocations();
 
     public abstract void removeCrateLocation(final String id);
 
