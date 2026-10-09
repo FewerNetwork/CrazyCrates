@@ -28,7 +28,8 @@ $sourceFiles = if ($upstreamLayout) {
         'common/src/main/java/com/ryderbelserion/crazycrates/common/storage/holder/StorageHolder.java',
         'common/src/main/java/com/ryderbelserion/crazycrates/common/storage/impl/file/types/YamlFactory.java',
         'common/src/main/java/com/ryderbelserion/crazycrates/common/storage/impl/sql/types/SqliteFactory.java',
-        'paper/src/main/java/com/badbones69/crazycrates/paper/tasks/crates/CrateManager.java'
+        'paper/src/main/java/com/badbones69/crazycrates/paper/tasks/crates/CrateManager.java',
+        'paper/src/main/java/com/badbones69/crazycrates/paper/utils/MiscUtils.java'
     ) | ForEach-Object { Get-Item (Join-Path $projectRoot $_) }
 } else { Get-ChildItem $sourceRoot -Filter '*.java' -Recurse -File }
 foreach ($source in $sourceFiles) {
@@ -38,7 +39,8 @@ foreach ($source in $sourceFiles) {
     [IO.File]::WriteAllText($destination, (Convert-RelocatedSource ([IO.File]::ReadAllText($source.FullName))))
 }
 $dependencies = Get-ChildItem $DependencyDirectory -Filter '*.jar' -File | Select-Object -ExpandProperty FullName
-$classpath = (@($OriginalJar, "$supportRoot/classes") + $dependencies) -join ';'
+$annotations = Get-ChildItem $DependencyDirectory -Filter "annotations-*.jar" | Sort-Object Name -Descending | Select-Object -First 1 -ExpandProperty FullName
+$classpath = (@($annotations, $OriginalJar, "$supportRoot/classes") + $dependencies) -join ';'
 $arguments = @('-encoding', 'UTF-8', '-classpath', ('"' + $classpath.Replace('\', '/') + '"'), '-d', ('"' + $classesRoot.Replace('\', '/') + '"'))
 $arguments += Get-ChildItem $generatedRoot -Filter '*.java' -Recurse -File | ForEach-Object { '"' + $_.FullName.Replace('\', '/') + '"' }
 $argumentFile = Join-Path $buildRoot 'compile.args'
@@ -52,10 +54,11 @@ New-Item -ItemType Directory -Force (Split-Path $generatedTest) | Out-Null
 $runtimeClasspath = "$classesRoot;$classpath"
 & "$JavaHome/bin/javac.exe" -cp $runtimeClasspath -d "$buildRoot/test-classes" $generatedTest
 if ($LASTEXITCODE) { throw 'Regression compilation failed' }
-& "$JavaHome/bin/java.exe" '-Dnet.bytebuddy.experimental=true' -cp "$buildRoot/test-classes;$runtimeClasspath" LocationPersistenceRegression
+$mockitoAgent = Get-ChildItem $DependencyDirectory -Filter 'mockito-core-*.jar' | Select-Object -First 1 -ExpandProperty FullName
+& "$JavaHome/bin/java.exe" "-Djava.io.tmpdir=$buildRoot" "-javaagent:$mockitoAgent" '-Dnet.bytebuddy.experimental=true' -cp "$buildRoot/test-classes;$runtimeClasspath" LocationPersistenceRegression
 if ($LASTEXITCODE) { throw 'Regression failed' }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-$output = Join-Path $buildRoot 'CrazyCrates-5.2.0-fewer.1.jar'
+$output = Join-Path $buildRoot 'CrazyCrates-5.2.0-fewer.2.jar'
 Copy-Item -LiteralPath $OriginalJar -Destination $output -Force
 $zip = [IO.Compression.ZipFile]::Open($output, [IO.Compression.ZipArchiveMode]::Update)
 try {
@@ -66,7 +69,7 @@ try {
     }
     $descriptor = $zip.GetEntry('paper-plugin.yml')
     $reader = [IO.StreamReader]::new($descriptor.Open())
-    $content = $reader.ReadToEnd().Replace("version: '5.2.0'", "version: '5.2.0-fewer.1'")
+    $content = $reader.ReadToEnd().Replace("version: '5.2.0'", "version: '5.2.0-fewer.2'").Replace("version: '5.2.0-fewer.1'", "version: '5.2.0-fewer.2'")
     $reader.Dispose()
     $descriptor.Delete()
     $writer = [IO.StreamWriter]::new($zip.CreateEntry('paper-plugin.yml').Open())

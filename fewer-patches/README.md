@@ -24,3 +24,5 @@ The regression calls the actual YAML factory, saves a temporary locations file,
 reloads it, and checks six valid placements, order, per-ID lookup, multiple
 failed/unavailable entries, unloaded-world entries, and immediate removal.
 World registration in a running Paper server still requires deployment testing.
+
+The fewer.2 patch also makes optional permission cleanup idempotent: absent nodes need no removal and existing nodes are still removed. Run `scripts/test-permission-cleanup.ps1` after the patch builder with `OriginalJar`, `DependencyDirectory`, and `PaperLibraryDirectory` pointing to local Paper runtime libraries. The test invokes the actual patched utility for all 140 disabled respin nodes, removes one existing node exactly once, and verifies no permission grants. A minimal optional HeadDatabase signature is generated into test classes only and is never packaged.
