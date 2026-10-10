@@ -7,7 +7,7 @@ import com.ryderbelserion.crazycrates.common.storage.impl.file.FlatFactory;
 import org.jspecify.annotations.NullMarked;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import us.crazycrew.crazycrates.api.enums.Files;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,12 +36,12 @@ public class YamlFactory extends FlatFactory {
     public Optional<CrazyLocation> getCrateLocation(final String id) {
         Optional<CrazyLocation> value = Optional.empty();
 
-        for (final Map.Entry<CrateStatus, CrazyLocation> index : getCrateLocations().entrySet()) {
-            final CrateStatus status = index.getKey();
+        for (final Map.Entry<CrazyLocation, CrateStatus> index : getCrateLocations().entrySet()) {
+            final CrateStatus status = index.getValue();
 
             if (status.equals(CrateStatus.failed)) continue;
 
-            final CrazyLocation location = index.getValue();
+            final CrazyLocation location = index.getKey();
 
             if (!location.getId().equals(id)) continue;
 
@@ -52,8 +52,8 @@ public class YamlFactory extends FlatFactory {
     }
 
     @Override
-    public Map<CrateStatus, CrazyLocation> getCrateLocations() {
-        final Map<CrateStatus, CrazyLocation> locations = new HashMap<>();
+    public Map<CrazyLocation, CrateStatus> getCrateLocations() {
+        final Map<CrazyLocation, CrateStatus> locations = new LinkedHashMap<>();
 
         final CommentedConfigurationNode configuration = Files.locations.getConfiguration();
 
@@ -72,14 +72,14 @@ public class YamlFactory extends FlatFactory {
             if (crateName.isBlank()) continue;
 
             if (!index.hasChild("X") || !index.hasChild("Y") || !index.hasChild("Z")) {
-                locations.put(CrateStatus.failed, new CrazyLocation(
+                locations.put(new CrazyLocation(
                         crateName,
                         worldName,
                         id,
                         -1,
                         -1,
                         -1
-                ));
+                ), CrateStatus.failed);
 
                 continue;
             }
@@ -91,12 +91,12 @@ public class YamlFactory extends FlatFactory {
             final CrazyLocation location = new CrazyLocation(crateName, worldName, id, x, y, z);
 
             if (!this.plugin.isCrateAvailable(crateName)) {
-                locations.put(CrateStatus.unavailable, location);
+                locations.put(location, CrateStatus.unavailable);
 
                 continue;
             }
 
-            locations.put(CrateStatus.success, location);
+            locations.put(location, CrateStatus.success);
         }
 
         return locations;

@@ -379,11 +379,9 @@ public class MiscUtils {
     public static void unregisterPermission(final String permission) {
         if (permission.isEmpty()) return;
 
-        if (pluginManager.getPermission(permission) == null) {
-            fusion.log(Level.WARNING, "Permission %s is not registered!", permission);
-
-            return;
-        }
+        // Disabled crate features also clean up their optional nodes on first load.
+        // An absent node already satisfies removal; repeated cleanup is a no-op.
+        if (pluginManager.getPermission(permission) == null) return;
 
         fusion.log(Level.WARNING, "Permission %s is unregistered!", permission);
 
