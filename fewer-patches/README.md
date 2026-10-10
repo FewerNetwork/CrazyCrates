@@ -26,3 +26,10 @@ failed/unavailable entries, unloaded-world entries, and immediate removal.
 World registration in a running Paper server still requires deployment testing.
 
 The fewer.2 patch also makes optional permission cleanup idempotent: absent nodes need no removal and existing nodes are still removed. Run `scripts/test-permission-cleanup.ps1` after the patch builder with `OriginalJar`, `DependencyDirectory`, and `PaperLibraryDirectory` pointing to local Paper runtime libraries. The test invokes the actual patched utility for all 140 disabled respin nodes, removes one existing node exactly once, and verifies no permission grants. A minimal optional HeadDatabase signature is generated into test classes only and is never packaged.
+
+
+The fewer.3 patch optionally orders CrazyCrates after Multiverse-Core. Without this
+ordering, SMP's spawn world is imported after physical crate initialization, so
+its crate locations and holograms are skipped. Multiverse remains optional and
+its classes are not imported. Reload clears previous broken-location records and
+reports the actual loaded location count rather than the crate-definition count.

@@ -58,7 +58,7 @@ $mockitoAgent = Get-ChildItem $DependencyDirectory -Filter 'mockito-core-*.jar' 
 & "$JavaHome/bin/java.exe" "-Djava.io.tmpdir=$buildRoot" "-javaagent:$mockitoAgent" '-Dnet.bytebuddy.experimental=true' -cp "$buildRoot/test-classes;$runtimeClasspath" LocationPersistenceRegression
 if ($LASTEXITCODE) { throw 'Regression failed' }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-$output = Join-Path $buildRoot 'CrazyCrates-5.2.0-fewer.2.jar'
+$output = Join-Path $buildRoot 'CrazyCrates-5.2.0-fewer.3.jar'
 Copy-Item -LiteralPath $OriginalJar -Destination $output -Force
 $zip = [IO.Compression.ZipFile]::Open($output, [IO.Compression.ZipArchiveMode]::Update)
 try {
@@ -69,7 +69,9 @@ try {
     }
     $descriptor = $zip.GetEntry('paper-plugin.yml')
     $reader = [IO.StreamReader]::new($descriptor.Open())
-    $content = $reader.ReadToEnd().Replace("version: '5.2.0'", "version: '5.2.0-fewer.2'").Replace("version: '5.2.0-fewer.1'", "version: '5.2.0-fewer.2'")
+    $content = $reader.ReadToEnd().Replace("version: '5.2.0'", "version: '5.2.0-fewer.3'").Replace("version: '5.2.0-fewer.1'", "version: '5.2.0-fewer.3'")
+    $content = $content.Replace("version: 5.2.0-fewer.2", "version: 5.2.0-fewer.3")
+    $content = $content.Replace("  server:", "  server:`n    Multiverse-Core:`n      load: BEFORE`n      required: false`n      join-classpath: false")
     $reader.Dispose()
     $descriptor.Delete()
     $writer = [IO.StreamWriter]::new($zip.CreateEntry('paper-plugin.yml').Open())
