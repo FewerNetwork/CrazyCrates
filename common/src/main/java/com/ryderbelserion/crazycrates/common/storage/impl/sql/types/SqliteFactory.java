@@ -72,7 +72,7 @@ public final class SqliteFactory extends SqlFactory {
     }
 
     @Override
-    public Map<CrateStatus, CrazyLocation> getCrateLocations() {
+    public Map<CrazyLocation, CrateStatus> getCrateLocations() {
         return Map.of();
     }
 

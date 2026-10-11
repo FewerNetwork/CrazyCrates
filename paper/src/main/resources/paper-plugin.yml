@@ -11,6 +11,12 @@ folia-supported: true
 
 dependencies:
   server:
+    # Physical crate worlds must exist before locations and labels are loaded.
+    Multiverse-Core:
+      load: BEFORE
+      required: false
+      join-classpath: false
+
     # Hologram plugins
     DecentHolograms:
       load: BEFORE
